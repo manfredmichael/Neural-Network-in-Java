@@ -42,14 +42,14 @@ class NeuralNetwork {
       }
     }
 
-    // output = Matrix.softmax(output);
+    output = Matrix.softmax(output);
     perceptrons.add(output.copy());
     output.T();
     return output.array[0];
   }
 
   void train(float [] inputArray, float [] targetArray) {
-    float learningRate=0.5;
+    float learningRate=0.01;
     ArrayList<Matrix> neurons=new ArrayList<Matrix>();
     ArrayList<Matrix> errors=new ArrayList<Matrix>();
 
@@ -69,7 +69,7 @@ class NeuralNetwork {
       }
     }
 
-    // output = Matrix.softmax(output);
+    output = Matrix.softmax(output);
     neurons.add(output.copy());
     errors.add(Matrix.sub(target, output));
 
@@ -93,17 +93,18 @@ class NeuralNetwork {
     for (int i=weights.size()-1; i>=0; i--) {
       Matrix gradient = errors.get(i).copy();
 
-      if (i < weights.size() - 1) {
+      // if (i < weights.size() - 1) {
         Matrix derivatedSigmoid=neurons.get(i+1).copy();
         Matrix inverseMatrix=derivatedSigmoid.copy();
         inverseMatrix.set(1);
         inverseMatrix=Matrix.sub(inverseMatrix, derivatedSigmoid);
         derivatedSigmoid=Matrix.hadamartProduct(derivatedSigmoid, inverseMatrix);
         gradient=Matrix.hadamartProduct(errors.get(i), derivatedSigmoid);
-      }
+      // }
 
+      gradient.mult(learningRate);
       Matrix slope=Matrix.mult(gradient, Matrix.getT(neurons.get(i)));
-      slope.mult(learningRate);
+      
 
       Matrix weight=weights.get(i).copy();
       weights.remove(i);

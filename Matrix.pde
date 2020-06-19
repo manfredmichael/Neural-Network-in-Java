@@ -189,8 +189,10 @@ class MatrixMath {
         result.array[i][j]=1/(1+exp(-1*x));
 
         Double d = new Double(result.array[i][j]);
-        if (d.isNaN())
+        if (d.isNaN()){
           print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+          noLoop();
+        }
       }
     }
     return result;
@@ -205,10 +207,6 @@ class MatrixMath {
         float x = result.array[i][j];
 
         Double d = new Double(x);
-        if (d.isNaN())
-          x = 0;
-        if(d.isInfinite())
-          x = 1000;
 
         sum += exp(x);
         // if (d.isNaN())
@@ -223,17 +221,13 @@ class MatrixMath {
         float x = result.array[i][j];
 
         Double d = new Double(x);
-         if (d.isNaN())
-          x = 0;
-        if(d.isInfinite())
-          x = 1000;
 
         result.array[i][j] = (float) (exp(x) / sum);
       }
     }
 
-    println(sum);
-    if(sum <= 0)
+    // println(sum);
+    if(sum == 0)
        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     return result;

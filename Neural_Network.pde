@@ -1,17 +1,17 @@
-int [] layers={3,10,10,10,3};
+int [] layers={3,10,10,3};
 NeuralNetwork nn;
 float [][] input= {{0,0,0}, {1,0,0}, {1,1,0}, {1,1,1}, {0,1,0}, {0,0,1}, {0,1,1}};
-float [][] target={{-10,20,-10}, {-10,20,20}, {-10,-10,20}, {-10,-10,-10}, {-10,-10,-10}, {20,20,-10}, {20,-10,-10}};
+float [][] target={{0,1,0}, {0,0.5,0.5}, {0,0,1}, {0,0,0}, {0,0,0}, {0.5,0.5,0}, {1,0,0}};
 
 int dataset = 0;
 
 NetBoard netBoard;
 void setup() {
-  fullScreen();
+  size(600,600);
   nn=new NeuralNetwork(layers);
   netBoard = new NetBoard();
   float cost;
-  for (int i=0; i<5000; i++) {
+  for (int i=0; i<10000; i++) {
     int randomIndex=round(random(input.length-1));
     float guess []=nn.feedForward(input[randomIndex]);
     nn.train(input[randomIndex], target[randomIndex]);
@@ -39,4 +39,16 @@ void keyPressed(){
   dataset++;
   if(dataset >= input.length)
     dataset = 0;
+}
+
+void mousePressed(){
+  for (int i=0; i<1; i++) {
+    int randomIndex=round(random(input.length-1));
+    float guess []=nn.feedForward(input[randomIndex]);
+    nn.train(input[randomIndex], target[randomIndex]);
+  }
+
+  for (Matrix o : nn.weights) {
+    o.printMatrix();
+  }
 }

@@ -14,10 +14,10 @@ import java.io.IOException;
 
 public class Neural_Network extends PApplet {
 
-int [] layers={3,10,10,10,3};
+int [] layers={3,10,10,3};
 NeuralNetwork nn;
 float [][] input= {{0,0,0}, {1,0,0}, {1,1,0}, {1,1,1}, {0,1,0}, {0,0,1}, {0,1,1}};
-float [][] target={{-10,20,-10}, {-10,20,20}, {-10,-10,20}, {-10,-10,-10}, {-10,-10,-10}, {20,20,-10}, {20,-10,-10}};
+float [][] target={{0,1,0}, {0,0.5f,0.5f}, {0,0,1}, {0,0,0}, {0,0,0}, {0.5f,0.5f,0}, {1,0,0}};
 
 int dataset = 0;
 
@@ -27,7 +27,7 @@ public void setup() {
   nn=new NeuralNetwork(layers);
   netBoard = new NetBoard();
   float cost;
-  for (int i=0; i<5000; i++) {
+  for (int i=0; i<100000; i++) {
     int randomIndex=round(random(input.length-1));
     float guess []=nn.feedForward(input[randomIndex]);
     nn.train(input[randomIndex], target[randomIndex]);
@@ -55,6 +55,18 @@ public void keyPressed(){
   dataset++;
   if(dataset >= input.length)
     dataset = 0;
+}
+
+public void mousePressed(){
+  for (int i=0; i<1; i++) {
+    int randomIndex=round(random(input.length-1));
+    float guess []=nn.feedForward(input[randomIndex]);
+    nn.train(input[randomIndex], target[randomIndex]);
+  }
+
+  for (Matrix o : nn.weights) {
+    o.printMatrix();
+  }
 }
 class Matrix {
   float [][] array;
@@ -247,8 +259,10 @@ class MatrixMath {
         result.array[i][j]=1/(1+exp(-1*x));
 
         Double d = new Double(result.array[i][j]);
-        if (d.isNaN())
+        if (d.isNaN()){
           print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+          noLoop();
+        }
       }
     }
     return result;
@@ -263,10 +277,6 @@ class MatrixMath {
         float x = result.array[i][j];
 
         Double d = new Double(x);
-        if (d.isNaN())
-          x = 0;
-        if(d.isInfinite())
-          x = 1000;
 
         sum += exp(x);
         // if (d.isNaN())
@@ -281,17 +291,13 @@ class MatrixMath {
         float x = result.array[i][j];
 
         Double d = new Double(x);
-         if (d.isNaN())
-          x = 0;
-        if(d.isInfinite())
-          x = 1000;
 
         result.array[i][j] = (float) (exp(x) / sum);
       }
     }
 
-    println(sum);
-    if(sum <= 0)
+    // println(sum);
+    if(sum == 0)
        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 
     return result;
@@ -343,14 +349,14 @@ class NeuralNetwork {
       }
     }
 
-    // output = Matrix.softmax(output);
+    output = Matrix.softmax(output);
     perceptrons.add(output.copy());
     output.T();
     return output.array[0];
   }
 
   public void train(float [] inputArray, float [] targetArray) {
-    float learningRate=0.5f;
+    float learningRate=0.01f;
     ArrayList<Matrix> neurons=new ArrayList<Matrix>();
     ArrayList<Matrix> errors=new ArrayList<Matrix>();
 
@@ -370,7 +376,7 @@ class NeuralNetwork {
       }
     }
 
-    // output = Matrix.softmax(output);
+    output = Matrix.softmax(output);
     neurons.add(output.copy());
     errors.add(Matrix.sub(target, output));
 
@@ -394,17 +400,18 @@ class NeuralNetwork {
     for (int i=weights.size()-1; i>=0; i--) {
       Matrix gradient = errors.get(i).copy();
 
-      if (i < weights.size() - 1) {
+      // if (i < weights.size() - 1) {
         Matrix derivatedSigmoid=neurons.get(i+1).copy();
         Matrix inverseMatrix=derivatedSigmoid.copy();
         inverseMatrix.set(1);
         inverseMatrix=Matrix.sub(inverseMatrix, derivatedSigmoid);
         derivatedSigmoid=Matrix.hadamartProduct(derivatedSigmoid, inverseMatrix);
         gradient=Matrix.hadamartProduct(errors.get(i), derivatedSigmoid);
-      }
+      // }
 
+      gradient.mult(learningRate);
       Matrix slope=Matrix.mult(gradient, Matrix.getT(neurons.get(i)));
-      slope.mult(learningRate);
+      
 
       Matrix weight=weights.get(i).copy();
       weights.remove(i);
@@ -469,7 +476,7 @@ class NetBoard {
     }
   }
 }
-  public void settings() {  fullScreen(); }
+  public void settings() {  size(600,600); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "Neural_Network" };
     if (passedArgs != null) {
